@@ -26,19 +26,11 @@ STRICT_MODE_OFF
 
 #include "common/common_utils/WindowsApisCommonPre.hpp"
 #undef FLOAT
-#ifdef check
-  #undef check
-  #define REDEFINE_CHECK
-#endif
+#undef check
 #include "rpc/client.h"
 //TODO: HACK: UE4 defines macro with stupid names like "check" that conflicts with msgpack library
-#ifdef REDEFINE_CHECK
-  #ifdef UE_CHECK_IMPL
-    #define check(expr) UE_CHECK_IMPL(expr)
-  #else
-    #define check(expr) { CA_ASSUME(expr); }
-  #endif
-  #undef REDEFINE_CHECK
+#ifndef check
+#define check(expr) (static_cast<void>((expr)))
 #endif
 #include "common/common_utils/WindowsApisCommonPost.hpp"
 
@@ -192,7 +184,7 @@ msr::airlib::GpsBase::Output RpcLibClientBase::getGpsData(const std::string& gps
     return pimpl_->client.call("getGpsData", gps_name, vehicle_name).as<RpcLibAdapatorsBase::GpsData>().to();
 }
 
-msr::airlib::DistanceBase::Output RpcLibClientBase::getDistanceSensorData(const std::string& distance_sensor_name, const std::string& vehicle_name) const
+msr::airlib::DistanceSensorData RpcLibClientBase::getDistanceSensorData(const std::string& distance_sensor_name, const std::string& vehicle_name) const
 {
     return pimpl_->client.call("getDistanceSensorData", distance_sensor_name, vehicle_name).as<RpcLibAdapatorsBase::DistanceSensorData>().to();
 }
@@ -240,7 +232,6 @@ vector<ImageCaptureBase::ImageResponse> RpcLibClientBase::simGetImages(vector<Im
 
     return RpcLibAdapatorsBase::ImageResponse::to(response_adaptor);
 }
-
 vector<uint8_t> RpcLibClientBase::simGetImage(const std::string& camera_name, ImageCaptureBase::ImageType type, const std::string& vehicle_name)
 {
     vector<uint8_t> result = pimpl_->client.call("simGetImage", camera_name, type, vehicle_name).as<vector<uint8_t>>();
@@ -360,26 +351,61 @@ std::vector<std::string> RpcLibClientBase::simSwapTextures(const std::string& ta
 	return pimpl_->client.call("simSwapTextures", tags, tex_id, component_id, material_id).as<vector<string>>();
 }
 
+bool RpcLibClientBase::simLoadLevel(const string& level_name)
+{
+    return pimpl_->client.call("simLoadLevel", level_name).as<bool>();
+}
+
+msr::airlib::Vector3r RpcLibClientBase::simGetObjectScale(const std::string& object_name) const
+{
+    return pimpl_->client.call("simGetObjectScale", object_name).as<RpcLibAdapatorsBase::Vector3r>().to();
+}
+
 msr::airlib::Pose RpcLibClientBase::simGetObjectPose(const std::string& object_name) const
 {
     return pimpl_->client.call("simGetObjectPose", object_name).as<RpcLibAdapatorsBase::Pose>().to();
 }
+
 bool RpcLibClientBase::simSetObjectPose(const std::string& object_name, const msr::airlib::Pose& pose, bool teleport)
 {
     return pimpl_->client.call("simSetObjectPose", object_name, RpcLibAdapatorsBase::Pose(pose), teleport).as<bool>();
+}
+
+bool RpcLibClientBase::simSetObjectScale(const std::string& object_name, const msr::airlib::Vector3r& scale)
+{
+	return pimpl_->client.call("simSetObjectScale", object_name, RpcLibAdapatorsBase::Vector3r(scale)).as<bool>();
 }
 
 CameraInfo RpcLibClientBase::simGetCameraInfo(const std::string& camera_name, const std::string& vehicle_name) const
 {
     return pimpl_->client.call("simGetCameraInfo", camera_name, vehicle_name).as<RpcLibAdapatorsBase::CameraInfo>().to();
 }
+
+void RpcLibClientBase::simSetCameraPose(const std::string& camera_name, const Pose& pose, const std::string& vehicle_name)
+{
+    pimpl_->client.call("simSetCameraPose", camera_name, RpcLibAdapatorsBase::Pose(pose), vehicle_name);
+}
+
 void RpcLibClientBase::simSetCameraOrientation(const std::string& camera_name, const Quaternionr& orientation, const std::string& vehicle_name)
 {
-    pimpl_->client.call("simSetCameraOrientation", camera_name, RpcLibAdapatorsBase::Quaternionr(orientation), vehicle_name);
+    std::cout << "`simSetCameraOrientation` API has been upgraded to `simSetCameraPose`. Please update your code." << std::endl;
+    Pose pose{Vector3r::Zero(), orientation};
+    RpcLibClientBase::simSetCameraPose(camera_name, pose, vehicle_name);
 }
+
 void RpcLibClientBase::simSetCameraFov(const std::string& camera_name, float fov_degrees, const std::string& vehicle_name)
 {
     pimpl_->client.call("simSetCameraFov", camera_name, fov_degrees, vehicle_name);
+}
+
+void RpcLibClientBase::simSetDistortionParam(const std::string& camera_name, const std::string& param_name, float value, const std::string& vehicle_name)
+{
+    pimpl_->client.call("simSetDistortionParam", camera_name, param_name, value, vehicle_name);
+}
+
+std::vector<float> RpcLibClientBase::simGetDistortionParams(const std::string& camera_name, const std::string& vehicle_name)
+{
+    return pimpl_->client.call("simGetDistortionParams", camera_name, vehicle_name).as<std::vector<float>>();
 }
 
 msr::airlib::Kinematics::State RpcLibClientBase::simGetGroundTruthKinematics(const std::string& vehicle_name) const
@@ -390,10 +416,20 @@ msr::airlib::Environment::State RpcLibClientBase::simGetGroundTruthEnvironment(c
 {
     return pimpl_->client.call("simGetGroundTruthEnvironment", vehicle_name).as<RpcLibAdapatorsBase::EnvironmentState>().to();;
 }
+bool RpcLibClientBase::simCreateVoxelGrid(const msr::airlib::Vector3r& position, const int& x, const int& y, const int& z, const float& res, const std::string& output_file)
+{
+    return pimpl_->client.call("simCreateVoxelGrid", RpcLibAdapatorsBase::Vector3r(position), x, y, z, res, output_file).as<bool>();
+}
+
 
 void RpcLibClientBase::cancelLastTask(const std::string& vehicle_name)
 {
     pimpl_->client.call("cancelLastTask", vehicle_name);
+}
+
+bool RpcLibClientBase::simRunConsoleCommand(const std::string& command)
+{
+    return pimpl_->client.call("simRunConsoleCommand", command).as<bool>();
 }
 
 //return value of last task. It should be true if task completed without
@@ -406,6 +442,27 @@ RpcLibClientBase* RpcLibClientBase::waitOnLastTask(bool* task_result, float time
     unused(task_result);
 
     return this;
+}
+
+void RpcLibClientBase::startRecording()
+{
+    pimpl_->client.call("startRecording");
+}
+
+void RpcLibClientBase::stopRecording()
+{
+    pimpl_->client.call("stopRecording");
+}
+
+bool RpcLibClientBase::isRecording()
+{
+    return pimpl_->client.call("isRecording").as<bool>();
+}
+
+void RpcLibClientBase::simSetWind(const Vector3r& wind) const
+{
+    RpcLibAdapatorsBase::Vector3r conv_wind(wind);
+    pimpl_->client.call("simSetWind", conv_wind);
 }
 
 void* RpcLibClientBase::getClient()
@@ -421,3 +478,4 @@ const void* RpcLibClientBase::getClient() const
 
 #endif
 #endif
+

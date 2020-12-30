@@ -4,16 +4,31 @@
 #include "common/CommonStructs.hpp"
 #include "api/WorldSimApiBase.hpp"
 #include "SimMode/SimModeBase.h"
+<<<<<<< HEAD
+=======
+#include "Components/StaticMeshComponent.h"
+#include "Runtime/Engine/Classes/Engine/StaticMesh.h"
+#include "Engine/LevelStreamingDynamic.h" 
+>>>>>>> e9f95a7772820c63c8d31e166d557aaf0c150f76
 #include <string>
 
 class WorldSimApi : public msr::airlib::WorldSimApiBase {
 public:
     typedef msr::airlib::Pose Pose;
     typedef msr::airlib::Vector3r Vector3r;
+<<<<<<< HEAD
 	typedef msr::airlib::MeshPositionVertexBuffersResponse MeshPositionVertexBuffersResponse;
+=======
+    typedef msr::airlib::MeshPositionVertexBuffersResponse MeshPositionVertexBuffersResponse;
+>>>>>>> e9f95a7772820c63c8d31e166d557aaf0c150f76
 
     WorldSimApi(ASimModeBase* simmode);
     virtual ~WorldSimApi() = default;
+
+    virtual bool loadLevel(const std::string& level_name) override;
+    
+    virtual std::string spawnObject(std::string& object_name, const std::string& load_name, const WorldSimApi::Pose& pose, const WorldSimApi::Vector3r& scale, bool physics_enabled) override;
+    virtual bool destroyObject(const std::string& object_name) override;
 
     virtual bool isPaused() const override;
     virtual void reset() override;
@@ -32,10 +47,17 @@ public:
     virtual void printLogMessage(const std::string& message,
         const std::string& message_param = "", unsigned char severity = 0) override;
 
+<<<<<<< HEAD
 	virtual std::unique_ptr<std::vector<std::string>> swapTextures(const std::string& tag, int tex_id = 0, int component_id = 0, int material_id = 0) override;
+=======
+    virtual std::unique_ptr<std::vector<std::string>> swapTextures(const std::string& tag, int tex_id = 0, int component_id = 0, int material_id = 0) override;
+>>>>>>> e9f95a7772820c63c8d31e166d557aaf0c150f76
     virtual std::vector<std::string> listSceneObjects(const std::string& name_regex) const override;
     virtual Pose getObjectPose(const std::string& object_name) const override;
     virtual bool setObjectPose(const std::string& object_name, const Pose& pose, bool teleport) override;
+    virtual bool runConsoleCommand(const std::string& command) override;
+    virtual Vector3r getObjectScale(const std::string& object_name) const override;
+    virtual bool setObjectScale(const std::string& object_name, const Vector3r& scale) override;
 
     //----------- Plotting APIs ----------/
     virtual void simFlushPersistentMarkers() override;
@@ -46,8 +68,30 @@ public:
     virtual void simPlotStrings(const std::vector<std::string>& strings, const std::vector<Vector3r>& positions, float scale, const std::vector<float>& color_rgba, float duration) override;
     virtual void simPlotTransforms(const std::vector<Pose>& poses, float scale, float thickness, float duration, bool is_persistent) override;
     virtual void simPlotTransformsWithNames(const std::vector<Pose>& poses, const std::vector<std::string>& names, float tf_scale, float tf_thickness, float text_scale, const std::vector<float>& text_color_rgba, float duration) override;
+<<<<<<< HEAD
 	virtual std::vector<MeshPositionVertexBuffersResponse> getMeshPositionVertexBuffers() const override;
 
 private:
     ASimModeBase* simmode_;
 };
+=======
+    virtual std::vector<MeshPositionVertexBuffersResponse> getMeshPositionVertexBuffers() const override;
+
+    // Recording APIs
+    virtual void startRecording() override;
+    virtual void stopRecording() override;
+    virtual bool isRecording() const override;
+
+    virtual void setWind(const Vector3r& wind) const override;
+    virtual bool createVoxelGrid(const Vector3r& position, const int& x_size, const int& y_size, const int& z_size, const float& res, const std::string& output_file) override;
+
+private:
+    AActor* createNewActor(const FActorSpawnParameters& spawn_params, const FTransform& actor_transform, const Vector3r& scale, UStaticMesh* static_mesh);
+    void spawnPlayer();
+
+private:
+    ASimModeBase* simmode_;
+    ULevelStreamingDynamic* current_level_;
+    std::vector<bool> voxel_grid_;
+};
+>>>>>>> e9f95a7772820c63c8d31e166d557aaf0c150f76

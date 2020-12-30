@@ -13,7 +13,11 @@ public:
     PhysXCarApi(const AirSimSettings::VehicleSetting* vehicle_setting, std::shared_ptr<SensorFactory> sensor_factory, 
                 const Kinematics::State& state, const Environment& environment, const msr::airlib::GeoPoint& home_geopoint)
     : CarApiBase(vehicle_setting, sensor_factory, state, environment),
+<<<<<<< HEAD
       home_geopoint_(home_geopoint), state_(state)
+=======
+      home_geopoint_(home_geopoint)
+>>>>>>> e9f95a7772820c63c8d31e166d557aaf0c150f76
     {}
 
     ~PhysXCarApi()
@@ -88,7 +92,10 @@ private:
     bool api_control_enabled_ = false;
     GeoPoint home_geopoint_;
     CarControls last_controls_;
+<<<<<<< HEAD
     const Kinematics::State& state_;
+=======
+>>>>>>> e9f95a7772820c63c8d31e166d557aaf0c150f76
     CarState last_car_state_;
 
 };

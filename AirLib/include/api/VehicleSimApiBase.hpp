@@ -45,8 +45,8 @@ public:
 
     virtual void initialize() = 0;
 
-    virtual void getImages(const std::vector<ImageCaptureBase::ImageRequest>& request, std::vector<ImageCaptureBase::ImageResponse> &responses) const = 0;
-    virtual void getImage(const ImageCaptureBase::ImageRequest& request, ImageCaptureBase::ImageResponse &response) const = 0;
+    virtual std::vector<ImageCaptureBase::ImageResponse> getImages(const std::vector<ImageCaptureBase::ImageRequest>& request) const = 0;
+    virtual std::vector<uint8_t> getImage(const std::string& camera_name, ImageCaptureBase::ImageType image_type) const = 0;
 
     virtual Pose getPose() const = 0;
     virtual void setPose(const Pose& pose, bool ignore_collision) = 0;
@@ -54,8 +54,10 @@ public:
     virtual const msr::airlib::Environment* getGroundTruthEnvironment() const = 0;
 
     virtual CameraInfo getCameraInfo(const std::string& camera_name) const = 0;
-    virtual void setCameraOrientation(const std::string& camera_name, const Quaternionr& orientation) = 0;
+    virtual void setCameraPose(const std::string& camera_name, const Pose& pose) = 0;
     virtual void setCameraFoV(const std::string& camera_name, float fov_degrees) = 0;
+    virtual void setDistortionParam(const std::string& camera_name, const std::string& param_name, float value) = 0;
+    virtual std::vector<float> getDistortionParams(const std::string& camera_name) = 0;
 
     virtual CollisionInfo getCollisionInfo() const = 0;
     virtual int getRemoteControlID() const = 0; //which RC to use, 0 is first one, -1 means disable RC (use keyborad)
@@ -74,3 +76,4 @@ public:
 
 } } //namespace
 #endif
+

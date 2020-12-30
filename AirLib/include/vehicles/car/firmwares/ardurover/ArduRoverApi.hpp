@@ -33,7 +33,11 @@ public:
     ArduRoverApi(const AirSimSettings::VehicleSetting* vehicle_setting, std::shared_ptr<SensorFactory> sensor_factory,
                  const Kinematics::State& state, const Environment& environment, const msr::airlib::GeoPoint& home_geopoint)
     : CarApiBase(vehicle_setting, sensor_factory, state, environment),
+<<<<<<< HEAD
       state_(state), home_geopoint_(home_geopoint)
+=======
+      home_geopoint_(home_geopoint)
+>>>>>>> e9f95a7772820c63c8d31e166d557aaf0c150f76
     {
         connection_info_ = static_cast<const AirSimSettings::MavLinkVehicleSetting*>(vehicle_setting)->connection_info;
         sensors_ = &getSensors();
@@ -277,7 +281,10 @@ private:
     const SensorCollection* sensors_;
 
     CarControls last_controls_;
+<<<<<<< HEAD
     const Kinematics::State& state_;
+=======
+>>>>>>> e9f95a7772820c63c8d31e166d557aaf0c150f76
     GeoPoint home_geopoint_;
     CarState last_car_state_;
 };
